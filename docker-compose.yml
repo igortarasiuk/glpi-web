@@ -1,0 +1,58 @@
+version: "3.3"
+services:
+#GLPI Container
+  glpi-web:
+    image: co0ker/glpi-web
+    container_name : glpi-web
+#    hostname: glpi-web
+    network_mode: "overlay"
+    networks:
+        net_overlay:
+    deploy:
+#        endpoint_mode: dnsrr
+        mode: replicated
+        replicas: 2
+        resources:
+            reservations:
+                cpus: '0.10'
+                memory: 150M
+            limits:
+                cpus: '0.50'
+                memory: 2G
+        restart_policy:
+            condition: on-failure
+            delay: 30s
+            max_attempts: 5
+            window: 60s
+
+
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /mnt/lfs_nfs/glpi:/var/www/html/glpi
+#    environment:
+#      - TIMEZONE=Europe/Kiev
+#      - GLPI_VERSION=latest
+#      - GLPI_PATHS_ROOT=/var/www/html/glpi
+#      - GLPI_PATHS_PLUGINS=/var/www/html/glpi/plugins
+#      - GLPI_REMOVE_INSTALLER=no
+#      - GLPI_INSTALL_PLUGINS="yes"
+    restart: always
+
+#volumes:
+#    nfs_lfs:
+#        driver_opts:
+#            type: "nfs"
+#            o: "addr=10.210.101.15,nolock,soft,rw"
+#            device: ":/x/x2/docker-stor"
+
+networks:
+    net_overlay:
+        driver: overlay
+#        driver_opts:
+#            parent: bo0.201
+        ipam:
+            config:
+                - subnet: 172.16.10.0/24
